@@ -1,10 +1,213 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Production Site</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Site - Institutional Trading Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-green { 0%, 100% { background-color: rgba(34, 197, 94, 0.2); } 50% { background-color: rgba(34, 197, 94, 0.4); } }
+        @keyframes pulse-red { 0%, 100% { background-color: rgba(239, 68, 68, 0.2); } 50% { background-color: rgba(239, 68, 68, 0.4); } }
+        .flash-up { animation: pulse-green 0.5s ease-out; }
+        .flash-down { animation: pulse-red 0.5s ease-out; }
+    </style>
 </head>
-<body>
-    <h1>Welcome to the Live Website!</h1>
-    <p>This is the stable, production version managed by the boss.</p>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+            <h1 class="text-xl font-bold tracking-wider text-emerald-400">DEMO SITE // TERMINAL</h1>
+        </div>
+        <div class="text-xs text-slate-400 font-mono bg-slate-950 px-3 py-1.5 rounded border border-slate-800">
+            MARKET STATUS: <span class="text-emerald-400 font-bold">OPEN</span>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left & Center: Chart & Market Data -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Ticker Search & Core Metric -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="bg-slate-950 border border-slate-700 rounded-lg p-2 flex items-center">
+                        <input type="text" id="tickerInput" value="AAPL" class="bg-transparent w-24 text-center font-mono font-bold text-xl uppercase focus:outline-none text-emerald-400" maxlength="5">
+                        <button id="searchBtn" class="text-xs bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded ml-2 font-mono transition">LOAD</button>
+                    </div>
+                    <div>
+                        <h2 id="companyName" class="text-lg font-semibold text-slate-200">Apple Inc.</h2>
+                        <p class="text-xs text-slate-500 font-mono">NASDAQ / USD</p>
+                    </div>
+                </div>
+                
+                <div class="text-right" id="priceDisplayContainer">
+                    <div id="lastPrice" class="text-4xl font-mono font-bold text-emerald-400 transition-colors duration-300">$182.45</div>
+                    <div id="priceChange" class="text-xs font-mono text-emerald-500 font-medium">+1.24 (+0.68%)</div>
+                </div>
+            </div>
+
+            <!-- Fake Graphic/Chart Area -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 h-64 flex flex-col justify-between relative overflow-hidden">
+                <div class="text-xs text-slate-500 font-mono flex justify-between z-10">
+                    <span>PERFORMANCE (LIVE SIMULATION)</span>
+                    <span id="chartTicker">AAPL / 1M INTERVAL</span>
+                </div>
+                
+                <!-- Mock SVG Waveform Graphic -->
+                <div class="absolute inset-0 flex items-end justify-center px-2 opacity-20 pointer-events-none">
+                    <svg class="w-full h-40 text-emerald-500" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <path d="M0,50 Q15,30 30,60 T60,20 T90,45 L100,30 L100,100 L0,100 Z" fill="currentColor"></path>
+                    </svg>
+                </div>
+                
+                <!-- Micro Grid Overlay for Cyberpunk look -->
+                <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_2rem] opacity-20"></div>
+
+                <div class="flex justify-between items-center border-t border-slate-800/60 pt-4 z-10 text-xs font-mono text-slate-400">
+                    <span>O: <span id="openPrice">$181.20</span></span>
+                    <span>H: <span id="highPrice">$183.10</span></span>
+                    <span>L: <span id="lowPrice">$180.75</span></span>
+                    <span>V: <span id="volumeAmt">52.4M</span></span>
+                </div>
+            </div>
+
+            <!-- Market Depth Grid -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                    <span class="text-xs text-slate-500 font-mono block mb-1">BID (BUY ORDERS)</span>
+                    <div id="bidPrice" class="text-xl font-mono text-slate-200 font-bold">$182.42</div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                    <span class="text-xs text-slate-500 font-mono block mb-1">ASK (SELL ORDERS)</span>
+                    <div id="askPrice" class="text-xl font-mono text-slate-200 font-bold">$182.48</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Order Entry Execution Panel -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col justify-between">
+            <div>
+                <h3 class="text-sm font-mono tracking-wider text-slate-400 mb-4 border-b border-slate-800 pb-2">ORDER EXECUTION</h3>
+                
+                <!-- Order Type Tabs -->
+                <div class="grid grid-cols-2 gap-2 bg-slate-950 p-1 rounded-lg border border-slate-800 mb-6">
+                    <button class="bg-slate-800 text-emerald-400 text-xs font-mono py-2 rounded font-bold shadow-sm">MARKET</button>
+                    <button class="text-slate-500 text-xs font-mono py-2 rounded cursor-not-allowed">LIMIT</button>
+                </div>
+
+                <!-- Quantity Selector -->
+                <div class="space-y-2 mb-6">
+                    <label class="text-xs font-mono text-slate-400 block">SHARES QUANTITY</label>
+                    <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-lg p-1">
+                        <button id="minusQty" class="w-10 h-10 bg-slate-900 hover:bg-slate-800 rounded text-slate-400 font-bold font-mono">-</button>
+                        <input type="number" id="qtyInput" value="10" class="bg-transparent text-center font-mono font-bold text-xl w-20 focus:outline-none">
+                        <button id="plusQty" class="w-10 h-10 bg-slate-900 hover:bg-slate-800 rounded text-slate-400 font-bold font-mono">+</button>
+                    </div>
+                </div>
+
+                <!-- Total Cost Display -->
+                <div class="bg-slate-950 border border-slate-800/80 rounded-lg p-4 font-mono mb-6">
+                    <div class="flex justify-between text-xs text-slate-500 mb-1">
+                        <span>EST. TOTAL COST</span>
+                        <span>USD</span>
+                    </div>
+                    <div id="totalCost" class="text-2xl font-bold text-slate-300">$1,824.50</div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3">
+                <button onclick="alert('Order Sent: Buying shares')" class="w-full bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-mono text-sm py-4 rounded-xl font-bold transition duration-150 tracking-wide shadow-lg shadow-emerald-950/20">
+                    EXECUTE BUY ORDER
+                </button>
+                <button onclick="alert('Order Sent: Selling shares')" class="w-full bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white font-mono text-sm py-4 rounded-xl font-bold transition duration-150 tracking-wide shadow-lg shadow-rose-950/20">
+                    EXECUTE SELL ORDER
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- App Engine Simulator Logic -->
+    <script>
+        // Database of tickers
+        const defaultAssets = {
+            AAPL: { name: "Apple Inc.", base: 182.45, vol: "52.4M" },
+            TSLA: { name: "Tesla Inc.", base: 175.20, vol: "88.1M" },
+            NVDA: { name: "NVIDIA Corp.", base: 875.12, vol: "41.7M" },
+            BTC:  { name: "Bitcoin / USD", base: 64250.00, vol: "28.9B" }
+        };
+
+        let currentTicker = "AAPL";
+        let currentPrice = defaultAssets[currentTicker].base;
+
+        function updateUI(priceFlashClass = '') {
+            const asset = defaultAssets[currentTicker] || { name: "Custom Asset", base: 100.00, vol: "1.0M" };
+            
+            document.getElementById('companyName').innerText = asset.name;
+            document.getElementById('chartTicker').innerText = `${currentTicker} / 1M INTERVAL`;
+            
+            // Format dynamic numeric outputs
+            const formattedPrice = currentPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            const lastPriceEl = document.getElementById('lastPrice');
+            lastPriceEl.innerText = formattedPrice;
+
+            // Apply flash animation container
+            const container = document.getElementById('priceDisplayContainer');
+            container.classList.remove('flash-up', 'flash-down');
+            if (priceFlashClass) {
+                void container.offsetWidth; // Trigger DOM reflow to restart animation
+                container.className = `text-right ${priceFlashClass}`;
+            }
+
+            // Mock calculations derived from live price tick
+            document.getElementById('bidPrice').innerText = (currentPrice * 0.9998).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            document.getElementById('askPrice').innerText = (currentPrice * 1.0002).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            document.getElementById('openPrice').innerText = (asset.base * 0.995).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            document.getElementById('highPrice').innerText = (Math.max(asset.base, currentPrice) * 1.005).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            document.getElementById('lowPrice').innerText = (Math.min(asset.base, currentPrice) * 0.991).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            document.getElementById('volumeAmt').innerText = asset.vol;
+
+            // Calculate Estimated Total Cost 
+            const qty = parseFloat(document.getElementById('qtyInput').value) || 0;
+            document.getElementById('totalCost').innerText = (currentPrice * qty).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        }
+
+        // Live engine simulation ticks
+        setInterval(() => {
+            const percentageChange = (Math.random() - 0.49) * 0.002; // Slight upward bias
+            const oldPrice = currentPrice;
+            currentPrice = currentPrice * (1 + percentageChange);
+            
+            const flashDirection = currentPrice >= oldPrice ? 'flash-up' : 'flash-down';
+            updateUI(flashDirection);
+        }, 1500);
+
+        // Interactive control overrides
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const rawVal = document.getElementById('tickerInput').value.toUpperCase().trim();
+            if(rawVal) {
+                currentTicker = rawVal;
+                currentPrice = defaultAssets[currentTicker] ? defaultAssets[currentTicker].base : (Math.random() * 500 + 10);
+                if(!defaultAssets[currentTicker]) {
+                    defaultAssets[currentTicker] = { name: `${currentTicker} Global Tracked Asset`, base: currentPrice, vol: "12.5M" };
+                }
+                updateUI();
+            }
+        });
+
+        // Quantity calculation triggers
+        const qtyBox = document.getElementById('qtyInput');
+        document.getElementById('plusQty').addEventListener('click', () => { qtyBox.value = parseInt(qtyBox.value) + 1; updateUI(); });
+        document.getElementById('minusQty').addEventListener('click', () => { if(qtyBox.value > 1) { qtyBox.value = parseInt(qtyBox.value) - 1; updateUI(); } });
+        qtyBox.addEventListener('input', updateUI);
+
+        // Init
+        updateUI();
+    </script>
 </body>
 </html>
